@@ -387,6 +387,37 @@ test_prog_set()
 	test_pure_prog_set "$@" < "$srcdir/$NAME.in"
 }
 
+test_pidns_run_strace()
+{
+	local parent_pid
+
+	check_prog tail
+	check_prog cut
+	check_prog grep
+
+	run_prog > /dev/null
+	run_strace --pidns-translation -f $@ $args > "$EXP"
+
+	# filter out logs made by the parent or init process of the pidns test
+	parent_pid="$(tail -n 2 $LOG | head -n 1 | cut -d' ' -f1)"
+	init_pid="$(tail -n 1 $LOG | cut -d' ' -f1)"
+	grep -E -v "^($parent_pid|$init_pid) " "$LOG" > "$OUT"
+	match_diff "$OUT" "$EXP"
+}
+
+test_pidns()
+{
+	# ioctl(NS_GET_PARENT) is added in Linux 4.9
+	require_min_kernel_version_or_skip 4.9
+	check_prog unshare
+
+	test_pidns_run_strace "$@"
+
+	# test PID translation when /proc is mounted from an other namespace
+	STRACE="unshare -Urpf $STRACE"
+	test_pidns_run_strace "$@"
+}
+
 check_prog cat
 check_prog rm
 

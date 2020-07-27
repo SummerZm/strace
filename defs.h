@@ -280,6 +280,9 @@ struct tcb {
 	struct timespec etime;	/* Syscall entry time (CLOCK_MONOTONIC) */
 	struct timespec delay_expiration_time; /* When does the delay end */
 
+	uint64_t pid_ns;
+	bool pid_ns_inited;
+
 	struct mmap_cache_t *mmap_cache;
 
 	/*
@@ -413,7 +416,11 @@ extern const struct xlat whence_codes[];
 # define RVAL_HEX	001	/* hex format */
 # define RVAL_OCTAL	002	/* octal format */
 # define RVAL_FD		010	/* file descriptor */
-# define RVAL_MASK	013	/* mask for these values */
+# define RVAL_TID	011	/* task ID */
+# define RVAL_SID	012	/* session ID */
+# define RVAL_TGID	013	/* thread group ID */
+# define RVAL_PGID	014	/* process group ID */
+# define RVAL_MASK	017	/* mask for these values */
 
 # define RVAL_STR	020	/* Print `auxstr' field after return val */
 # define RVAL_NONE	040	/* Print nothing */
@@ -427,6 +434,16 @@ extern const struct xlat whence_codes[];
 # define IOCTL_NUMBER_STOP_LOOKUP 010
 
 # define indirect_ipccall(tcp) (tcp_sysent(tcp)->sys_flags & TRACE_INDIRECT_SUBCALL)
+
+enum pid_type {
+	PT_TID,
+	PT_TGID,
+	PT_PGID,
+	PT_SID,
+
+	PT_COUNT,
+	PT_NONE = -1
+};
 
 enum sock_proto {
 	SOCK_PROTO_UNKNOWN,
@@ -469,6 +486,7 @@ extern int Tflag_scale;
 extern int Tflag_width;
 extern bool iflag;
 extern bool count_wallclock;
+extern unsigned int pidns_translation;
 /* are we filtering traces based on paths? */
 extern struct path_set {
 	const char **paths_selected;
@@ -983,6 +1001,11 @@ print_local_array_ex(struct tcb *tcp,
 extern kernel_ulong_t *
 fetch_indirect_syscall_args(struct tcb *, kernel_ulong_t addr, unsigned int n_args);
 
+extern void pidns_init(void);
+
+extern int translate_pid(struct tcb *tcp, int dest_id, enum pid_type type,
+		    int *proc_pid_ptr);
+
 extern void
 dumpiov_in_msghdr(struct tcb *, kernel_ulong_t addr, kernel_ulong_t data_size);
 
@@ -1058,6 +1081,8 @@ printfd(struct tcb *tcp, int fd)
  * of the tracee the descriptor tcp).  This is a stub.
  */
 extern void printfd_pid_tracee_ns(struct tcb *tcp, pid_t pid, int fd);
+extern void printpid(struct tcb *tcp, int pid, enum pid_type type);
+extern void printpid_translation(struct tcb *tcp, int pid, enum pid_type type);
 extern void print_sockaddr(const void *sa, int len);
 extern bool
 print_inet_addr(int af, const void *addr, unsigned int len, const char *var_name);

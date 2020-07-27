@@ -1083,7 +1083,7 @@ printfd(struct tcb *tcp, int fd)
 extern void printfd_pid_tracee_ns(struct tcb *tcp, pid_t pid, int fd);
 extern void printpid(struct tcb *tcp, int pid, enum pid_type type);
 extern void printpid_translation(struct tcb *tcp, int pid, enum pid_type type);
-extern void print_sockaddr(const void *sa, int len);
+extern void print_sockaddr(struct tcb *tcp, const void *sa, int len);
 extern bool
 print_inet_addr(int af, const void *addr, unsigned int len, const char *var_name);
 extern bool

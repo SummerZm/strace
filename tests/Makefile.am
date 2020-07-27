@@ -109,17 +109,25 @@ check_PROGRAMS = $(PURE_EXECUTABLES) \
 	delay \
 	execve-v \
 	execveat-v \
+	fcntl--pidns-translation \
+	fcntl64--pidns-translation \
 	filter_seccomp-flag \
 	filter_seccomp-perf \
 	filter-unavailable \
 	fork-f \
+	fork--pidns-translation \
 	fsync-y \
 	get_process_reaper \
+	getpgrp--pidns-translation	\
 	getpid	\
+	getpid--pidns-translation	\
 	getppid	\
+	getsid--pidns-translation \
 	gettid \
+	gettid--pidns-translation \
 	inject-nf \
 	int_0x80 \
+	ioctl_block--pidns-translation \
 	ioctl_dm-v \
 	ioctl_evdev-success \
 	ioctl_evdev-success-Xabbrev \
@@ -150,18 +158,25 @@ check_PROGRAMS = $(PURE_EXECUTABLES) \
 	ioctl_v4l2-success-v-Xabbrev \
 	ioctl_v4l2-success-v-Xraw \
 	ioctl_v4l2-success-v-Xverbose \
+	ioprio--pidns-translation \
 	is_linux_mips_n64 \
+	kcmp-y--pidns-translation \
 	kill_child \
+	kill--pidns-translation \
 	ksysent \
 	list_sigaction_signum \
 	localtime \
 	looping_threads \
+	migrate_pages--pidns-translation \
 	mmsg-silent \
 	mmsg_name-v \
+	move_pages--pidns-translation \
 	msg_control-v \
 	net-accept-connect \
+	net-sockaddr--pidns-translation \
 	net-tpacket_stats-success \
 	nlattr_ifla_xdp-y \
+	netlink_audit--pidns-translation \
 	netlink_inet_diag \
 	netlink_netlink_diag \
 	netlink_unix_diag \
@@ -173,14 +188,19 @@ check_PROGRAMS = $(PURE_EXECUTABLES) \
 	pc \
 	perf_event_open_nonverbose \
 	perf_event_open_unabbrev \
+	pidfd_open--pidns-translation \
+	pidfd_send_signal--pidns-translation \
 	poll-P \
 	ppoll-P \
 	ppoll-v \
+	prlimit64--pidns-translation \
 	prctl-seccomp-filter-v \
 	prctl-seccomp-strict \
 	prctl-spec-inject \
 	print_maxfd \
 	print_ppid_tracerpid \
+	process_vm_readv--pidns-translation \
+	process_vm_writev--pidns-translation \
 	qual_fault \
 	qual_inject-error-signal \
 	qual_inject-retval \
@@ -194,7 +214,13 @@ check_PROGRAMS = $(PURE_EXECUTABLES) \
 	quotactl-xfs-v \
 	redirect-fds \
 	restart_syscall \
+	rt_sigqueueinfo--pidns-translation \
+	rt_tgsigqueueinfo--pidns-translation \
 	run_expect_termsig \
+	sched_xetaffinity--pidns-translation \
+	sched_xetattr--pidns-translation \
+	sched_xetparam--pidns-translation \
+	sched_xetscheduler--pidns-translation \
 	scm_rights \
 	seccomp-filter-v \
 	seccomp-strict \
@@ -204,12 +230,14 @@ check_PROGRAMS = $(PURE_EXECUTABLES) \
 	set_sigign \
 	setpgrp-exec \
 	signal_receive \
+	signal_receive--pidns-translation \
 	sleep \
 	stack-fcall \
 	stack-fcall-attach \
 	stack-fcall-mangled \
 	status-none-threads \
 	status-unfinished-threads \
+	so_peercred--pidns-translation \
 	syslog-success \
 	threads-execve \
 	threads-execve--quiet-thread-execve \
@@ -223,6 +251,9 @@ check_PROGRAMS = $(PURE_EXECUTABLES) \
 	vfork-f \
 	wait4-v \
 	waitid-v \
+	xetpgid--pidns-translation \
+	xetpriority--pidns-translation \
+	xet_robust_list--pidns-translation \
 	zeroargc \
 	# end of check_PROGRAMS
 
@@ -310,6 +341,7 @@ DECODER_TESTS = \
 	int_0x80.test \
 	inotify_init-y.test \
 	ioctl.test \
+	ioctl_block--pidns-translation.test \
 	ioctl_evdev-success.test \
 	ipc_msgbuf.test \
 	kern_features-fault.test \
@@ -381,12 +413,14 @@ MISC_TESTS = \
 	filtering_fd-syntax.test \
 	filtering_syscall-syntax.test \
 	first_exec_failure.test \
+	fork--pidns-translation.test \
 	get_regs.test \
 	inject-nf.test \
 	interactive_block.test \
 	kill_child.test \
 	localtime.test \
 	looping_threads.test \
+	netlink_audit--pidns-translation.test \
 	opipe.test \
 	options-syntax.test \
 	pc.test \
@@ -467,6 +501,7 @@ EXTRA_DIST = \
 	filter_seccomp.in \
 	filter_seccomp.sh \
 	filter-unavailable.expected \
+	fork--pidns-translation.awk \
 	fstatat.c \
 	fstatx.c \
 	gen_pure_executables.sh \

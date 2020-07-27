@@ -70,7 +70,9 @@ print_cap_header(struct tcb *const tcp, const kernel_ulong_t addr,
 	tprints("{version=");
 	printxval(cap_version, h->version,
 		  "_LINUX_CAPABILITY_VERSION_???");
-	tprintf(", pid=%d}", h->pid);
+	tprintf(", pid=");
+	printpid(tcp, h->pid, PT_TGID);
+	tprintf("}");
 }
 
 static void

@@ -21,14 +21,14 @@
 #include "xlat/notifyflags.h"
 
 static void
-print_struct_flock64(const struct_kernel_flock64 *fl, const int getlk)
+print_struct_flock64(struct tcb *const tcp, const struct_kernel_flock64 *fl, const int getlk)
 {
 	PRINT_FIELD_XVAL("{", *fl, l_type, lockfcmds, "F_???");
 	PRINT_FIELD_XVAL(", ", *fl, l_whence, whence_codes, "SEEK_???");
 	PRINT_FIELD_D(", ", *fl, l_start);
 	PRINT_FIELD_D(", ", *fl, l_len);
 	if (getlk)
-		PRINT_FIELD_D(", ", *fl, l_pid);
+		PRINT_FIELD_TGID(", ", *fl, l_pid, tcp);
 	tprints("}");
 }
 
@@ -38,7 +38,7 @@ printflock64(struct tcb *const tcp, const kernel_ulong_t addr, const int getlk)
 	struct_kernel_flock64 fl;
 
 	if (fetch_struct_flock64(tcp, addr, &fl))
-		print_struct_flock64(&fl, getlk);
+		print_struct_flock64(tcp, &fl, getlk);
 }
 
 static void
@@ -47,7 +47,7 @@ printflock(struct tcb *const tcp, const kernel_ulong_t addr, const int getlk)
 	struct_kernel_flock64 fl;
 
 	if (fetch_struct_flock(tcp, addr, &fl))
-		print_struct_flock64(&fl, getlk);
+		print_struct_flock64(tcp, &fl, getlk);
 }
 
 static void
@@ -59,8 +59,23 @@ print_f_owner_ex(struct tcb *const tcp, const kernel_ulong_t addr)
 		return;
 
 	PRINT_FIELD_XVAL("{", owner, type, f_owner_types, "F_OWNER_???");
-	PRINT_FIELD_D(", ", owner, pid);
-	tprints("}");
+
+	enum pid_type pid_type = PT_NONE;
+	switch (owner.type)
+	{
+	case F_OWNER_TID:
+		pid_type = PT_TID;
+		break;
+	case F_OWNER_PID:
+		pid_type = PT_TGID;
+		break;
+	case F_OWNER_PGRP:
+		pid_type = PT_PGID;
+		break;
+	}
+	tprintf(", pid=");
+	printpid(tcp, owner.pid, pid_type);
+	tprintf("}");
 }
 
 static int
@@ -74,6 +89,14 @@ print_fcntl(struct tcb *tcp)
 		printflags(fdflags, tcp->u_arg[2], "FD_???");
 		break;
 	case F_SETOWN:
+		tprintf(", ");
+		const int pid = tcp->u_arg[2];
+		tprintf("%d", pid);
+		if (pid < 0)
+			printpid_translation(tcp, -pid, PT_PGID);
+		else
+			printpid_translation(tcp,  pid, PT_TGID);
+		break;
 	case F_SETPIPE_SZ:
 		tprintf(", %" PRI_kld, tcp->u_arg[2]);
 		break;
@@ -116,6 +139,8 @@ print_fcntl(struct tcb *tcp)
 		printsignal(tcp->u_arg[2]);
 		break;
 	case F_GETOWN:
+		return RVAL_DECODED |
+		       ((int) tcp->u_rval < 0 ? RVAL_PGID : RVAL_TGID);
 	case F_GETPIPE_SZ:
 		break;
 	case F_GETFD:

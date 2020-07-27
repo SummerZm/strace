@@ -1532,6 +1532,9 @@ DECL_PRINTNUM_ADDR(int64);
 extern bool
 printnum_fd(struct tcb *, kernel_ulong_t addr);
 
+extern bool
+printnum_pid(struct tcb *const tcp, const kernel_ulong_t addr, enum pid_type type);
+
 static inline bool
 printnum_slong(struct tcb *tcp, kernel_ulong_t addr)
 {

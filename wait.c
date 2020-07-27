@@ -86,8 +86,13 @@ printwaitn(struct tcb *const tcp,
 		 * for example, wait4(4294967295, ...) instead of -1
 		 * in strace. We have to use int here, not long.
 		 */
-		int pid = tcp->u_arg[0];
-		tprintf("%d, ", pid);
+		int pid = (int) tcp->u_arg[0];
+		tprintf("%d", pid);
+		if (pid > 0)
+			printpid_translation(tcp, pid, PT_TGID);
+		else if (pid < -1)
+			printpid_translation(tcp, -pid, PT_PGID);
+		tprintf(", ");
 	} else {
 		int status;
 
@@ -108,7 +113,7 @@ printwaitn(struct tcb *const tcp,
 				printaddr(tcp->u_arg[3]);
 		}
 	}
-	return 0;
+	return RVAL_TGID;
 }
 
 SYS_FUNC(waitpid)
@@ -134,10 +139,28 @@ SYS_FUNC(osf_wait4)
 
 SYS_FUNC(waitid)
 {
+	unsigned int idtype = (unsigned int) tcp->u_arg[0];
+	int id = (int) tcp->u_arg[1];
+
 	if (entering(tcp)) {
-		printxval(waitid_types, tcp->u_arg[0], "P_???");
-		int pid = tcp->u_arg[1];
-		tprintf(", %d, ", pid);
+		printxval(waitid_types, idtype, "P_???");
+		tprintf(", ");
+		switch (idtype)
+		{
+		case P_PID:
+			printpid(tcp, id, PT_TGID);
+			break;
+		case P_PIDFD:
+			printfd(tcp, id);
+			break;
+		case P_PGID:
+			printpid(tcp, id, PT_PGID);
+			break;
+		default:
+			tprintf("%d", id);
+			break;
+		}
+		tprintf(", ");
 	} else {
 		/* siginfo */
 		printsiginfo_at(tcp, tcp->u_arg[2]);

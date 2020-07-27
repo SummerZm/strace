@@ -1002,7 +1002,7 @@ extern kernel_ulong_t *
 fetch_indirect_syscall_args(struct tcb *, kernel_ulong_t addr, unsigned int n_args);
 
 extern void pidns_init(void);
-
+extern int get_proc_pid(struct tcb *tcp);
 extern int translate_pid(struct tcb *tcp, int dest_id, enum pid_type type,
 		    int *proc_pid_ptr);
 
